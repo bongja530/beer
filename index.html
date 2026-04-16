@@ -817,8 +817,10 @@ function onRoomUpdate(data){
   // 투표 동기화
   if(inVote&&data.vote&&data.vote.round===currentRound){
     const rv=data.vote.votes||{};let ch=false;
-    Object.keys(rv).forEach(id=>{if(votes[id]===undefined&&id!==myId){votes[id]=rv[id];ch=true;}});
-    if(ch){renderTally();checkAllVoted();}
+    Object.keys(rv).forEach(id=>{if(votes[id]===undefined){votes[id]=rv[id];ch=true;}});
+
+    if(ch){renderTally();}checkAllVoted();
+
     renderMembers('ml2');return;
   }
   // 게스트: 투표 화면 전환
@@ -990,8 +992,12 @@ function renderTally(){
 
 function checkAllVoted(){
   const ids=Object.keys(members);
-  if(ids.length>0&&ids.every(id=>votes[id]!==undefined)) setTimeout(nextRound,600);
+  if(ids.length>0&&ids.every(id=>votes[id]!==undefined)){
+    updateRoom({vote:{round:currentRound,votes:votes,done:true},members:members});
+    setTimeout(nextRound,600);
+  }
 }
+
 
 function submitVote(choice){
   if(myVoteDone)return; myVoteDone=true;
